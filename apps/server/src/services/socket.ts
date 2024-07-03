@@ -1,5 +1,7 @@
 import { Server } from "socket.io"
 import Redis from 'ioredis';
+import prismaClient from "./prisma";
+import {createProducer, produceMessage} from './kafka';
 
 const serviceUri = "rediss://default************"
 
@@ -40,6 +42,8 @@ class SocketService {
             if (channel === 'MESSAGES') {
                 console.log("New message from redis: ", message)
                 io.emit("message", message);
+                await produceMessage(message);
+                console.log("Message produced to kafka broker");
             }
         });
     }
